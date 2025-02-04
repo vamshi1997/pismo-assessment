@@ -1,0 +1,11 @@
+[app]
+  [app.server]
+    host = "0.0.0.0"
+    port = 8080
+  [app.db]
+    username = "root"
+    password = "userpassword"
+    host     = "127.0.0.1"
+    dbname   = "mydatabase"
+    port     = "3306"
+    charset = "utf8mb4"
