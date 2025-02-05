@@ -28,7 +28,7 @@ func InitDb() {
 	fmt.Println(cfg.AppConfig.DB.Host)
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
-		cfg.AppConfig.DB.UserName,
+		cfg.AppConfig.DB.Username,
 		cfg.AppConfig.DB.Password,
 		cfg.AppConfig.DB.Host,
 		cfg.AppConfig.DB.Port,
