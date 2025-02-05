@@ -1,6 +1,6 @@
 package model
 
-type OperationType int
+type OperationType uint
 
 const (
 	NormalPurchase       OperationType = iota + 1 // 1
@@ -20,4 +20,8 @@ var transactionTypeToString = map[OperationType]string{
 // String method for pretty printing
 func (t OperationType) String() string {
 	return transactionTypeToString[t]
+}
+
+func IsValidOperationType(id uint) bool {
+	return id == uint(NormalPurchase) || id == uint(PurchaseInstallments) || id == uint(Withdrawal) || id == uint(CreditVoucher)
 }
