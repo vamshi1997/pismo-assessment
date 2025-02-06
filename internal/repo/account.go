@@ -3,13 +3,11 @@ package repo
 import (
 	"log"
 
-	"github.com/vamshi1997/pismo-assessment/internal/boot"
 	"github.com/vamshi1997/pismo-assessment/internal/model"
 )
 
-func CreateAccount(account model.Account) (model.Account, error) {
-	db := boot.GetDB()
-	if err := db.Create(&account); err.Error != nil {
+func (r *Repository) CreateAccount(account model.Account) (model.Account, error) {
+	if err := r.db.Create(&account); err.Error != nil {
 		log.Println("Error while creating account: ", err.Error)
 		return account, err.Error
 	}
@@ -18,12 +16,10 @@ func CreateAccount(account model.Account) (model.Account, error) {
 	return account, nil
 }
 
-func GetAccount(accountId uint) (*model.Account, error) {
-	db := boot.GetDB()
-
+func (r *Repository) GetAccount(accountId uint) (*model.Account, error) {
 	var accountInfo model.Account
 
-	if err := db.Where("id = ?", accountId).First(&accountInfo); err.Error != nil {
+	if err := r.db.Where("id = ?", accountId).First(&accountInfo); err.Error != nil {
 		log.Println("Error while fetching account info: ", err.Error)
 		return nil, err.Error
 	}

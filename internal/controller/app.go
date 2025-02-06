@@ -8,13 +8,23 @@ import (
 	"strconv"
 )
 
+type Controller struct {
+	repo repo.IRepository
+}
+
+func NewController(repo repo.IRepository) *Controller {
+	return &Controller{
+		repo: repo,
+	}
+}
+
 // Status method Gives application status to check if it's working or not
 func Status(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, map[string]interface{}{"status": "ok"})
 }
 
 // CreateAccount method takes document number and create account accordingly
-func CreateAccount(ctx *gin.Context) {
+func (c *Controller) CreateAccount(ctx *gin.Context) {
 	var (
 		account     model.Account
 		accountInfo model.Account
@@ -39,7 +49,7 @@ func CreateAccount(ctx *gin.Context) {
 		return
 	}
 
-	accountInfo, err := repo.CreateAccount(account)
+	accountInfo, err := c.repo.CreateAccount(account)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":     err.Error(),
@@ -57,7 +67,7 @@ func CreateAccount(ctx *gin.Context) {
 }
 
 // GetAccount method takes account number and fetch account details if exists else return error
-func GetAccount(ctx *gin.Context) {
+func (c *Controller) GetAccount(ctx *gin.Context) {
 
 	// fetch account id from request param and converting it to integer
 	accountID, err := strconv.Atoi(ctx.Param("accountId"))
@@ -71,7 +81,7 @@ func GetAccount(ctx *gin.Context) {
 	}
 
 	// fetch account info from db
-	accountInfo, err := repo.GetAccount(uint(accountID))
+	accountInfo, err := c.repo.GetAccount(uint(accountID))
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"error":     err.Error(),
@@ -95,7 +105,7 @@ func GetAccount(ctx *gin.Context) {
 }
 
 // CreateTransaction method takes account_id, operation_type and amount and create it accordingly
-func CreateTransaction(ctx *gin.Context) {
+func (c *Controller) CreateTransaction(ctx *gin.Context) {
 	var (
 		transaction     model.Transaction
 		transactionInfo *model.Transaction
@@ -137,7 +147,7 @@ func CreateTransaction(ctx *gin.Context) {
 	}
 
 	// check 4: if account is valid or not, then only transaction can be done
-	accountInfo, err := repo.GetAccount(transaction.AccountID)
+	accountInfo, err := c.repo.GetAccount(transaction.AccountID)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"error":     err.Error(),
@@ -153,7 +163,7 @@ func CreateTransaction(ctx *gin.Context) {
 		})
 	}
 
-	if transactionInfo, err = repo.CreateTransaction(transaction); err != nil {
+	if transactionInfo, err = c.repo.CreateTransaction(transaction); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":     err.Error(),
 			"error_msg": "Invalid transaction",

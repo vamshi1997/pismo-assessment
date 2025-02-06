@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"log"
 
 	"github.com/vamshi1997/pismo-assessment/internal/boot"
@@ -9,12 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitiateRouter() {
+func InitiateRouter(db *gorm.DB) {
 	router := gin.New()
 
 	cfg := boot.GetConfig()
 
-	InitAppRoutes(router)
+	InitAppRoutes(router, db)
 
 	serverAddr := fmt.Sprintf("%s:%v", cfg.AppConfig.Server.Host, cfg.AppConfig.Server.Port)
 	err := router.Run(serverAddr)
