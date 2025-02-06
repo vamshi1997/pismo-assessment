@@ -1,5 +1,4 @@
 mode: atomic
-github.com/vamshi1997/pismo-assessment/cmd/main.go:9.13,13.2 3 0
 github.com/vamshi1997/pismo-assessment/internal/boot/boot.go:17.16,20.2 2 0
 github.com/vamshi1997/pismo-assessment/internal/boot/boot.go:22.23,24.2 1 0
 github.com/vamshi1997/pismo-assessment/internal/boot/boot.go:26.15,39.16 4 0
@@ -13,6 +12,10 @@ github.com/vamshi1997/pismo-assessment/internal/boot/config.go:41.2,44.16 3 0
 github.com/vamshi1997/pismo-assessment/internal/boot/config.go:44.16,47.3 2 0
 github.com/vamshi1997/pismo-assessment/internal/boot/config.go:49.2,49.48 1 0
 github.com/vamshi1997/pismo-assessment/internal/boot/config.go:52.25,54.2 1 0
+github.com/vamshi1997/pismo-assessment/cmd/main.go:9.13,13.2 3 0
+github.com/vamshi1997/pismo-assessment/internal/model/operation_type.go:21.40,23.2 1 0
+github.com/vamshi1997/pismo-assessment/internal/model/operation_type.go:25.41,27.2 1 0
+github.com/vamshi1997/pismo-assessment/internal/model/transaction.go:19.61,22.2 2 0
 github.com/vamshi1997/pismo-assessment/internal/repo/account.go:9.82,10.52 1 0
 github.com/vamshi1997/pismo-assessment/internal/repo/account.go:10.52,13.3 2 0
 github.com/vamshi1997/pismo-assessment/internal/repo/account.go:15.2,16.21 2 0
@@ -23,9 +26,6 @@ github.com/vamshi1997/pismo-assessment/internal/repo/interface.go:18.45,22.2 1 0
 github.com/vamshi1997/pismo-assessment/internal/repo/transaction.go:8.99,9.56 1 0
 github.com/vamshi1997/pismo-assessment/internal/repo/transaction.go:9.56,12.3 2 0
 github.com/vamshi1997/pismo-assessment/internal/repo/transaction.go:14.2,14.26 1 0
-github.com/vamshi1997/pismo-assessment/internal/model/operation_type.go:21.40,23.2 1 0
-github.com/vamshi1997/pismo-assessment/internal/model/operation_type.go:25.41,27.2 1 0
-github.com/vamshi1997/pismo-assessment/internal/model/transaction.go:19.61,22.2 2 0
 github.com/vamshi1997/pismo-assessment/internal/repo/mock/interface.go:26.67,30.2 3 0
 github.com/vamshi1997/pismo-assessment/internal/repo/mock/interface.go:33.65,35.2 1 0
 github.com/vamshi1997/pismo-assessment/internal/repo/mock/interface.go:38.87,44.2 5 0
