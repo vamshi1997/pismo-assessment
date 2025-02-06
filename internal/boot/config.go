@@ -2,8 +2,8 @@ package boot
 
 import (
 	"fmt"
-
 	"github.com/spf13/viper"
+	"log"
 )
 
 var (
@@ -38,15 +38,15 @@ func InitConfig() {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	fmt.Println("Configs are loaded successfully ...")
+	log.Println("Configs are loaded successfully ...")
 
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
-		fmt.Printf("Error unmarshaling config: %s\n", err)
+		log.Printf("Error unmarshaling config: %s\n", err)
 		return
 	}
 
-	fmt.Println("Configs are mapped properly ...")
+	log.Println("Configs are mapped properly ...")
 }
 
 func GetConfig() Config {

@@ -3,6 +3,7 @@ package boot
 import (
 	"fmt"
 	"github.com/vamshi1997/pismo-assessment/internal/model"
+	"log"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -25,8 +26,6 @@ func GetDB() *gorm.DB {
 func InitDb() {
 	cfg = GetConfig()
 
-	fmt.Println(cfg.AppConfig.DB.Host)
-
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
 		cfg.AppConfig.DB.Username,
 		cfg.AppConfig.DB.Password,
@@ -38,16 +37,16 @@ func InitDb() {
 
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Println("Not able connect to database")
+		log.Println("Not able connect to database")
 		panic(err)
 	}
-	fmt.Println("Application connected to database successfully ...")
+	log.Println("Application connected to database successfully ...")
 
 	err := db.AutoMigrate(&model.Account{}, &model.Transaction{})
 	if err != nil {
-		fmt.Println("Not able migrate account or transaction table")
+		log.Println("Not able migrate account or transaction table")
 		panic(err)
 	}
-	fmt.Println("migrated account table successfully ...")
+	log.Println("migrated account table successfully ...")
 
 }

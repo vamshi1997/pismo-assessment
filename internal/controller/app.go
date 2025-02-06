@@ -90,6 +90,7 @@ func GetAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"account_id":      accountInfo.ID,
 		"document_number": accountInfo.DocumentNumber,
+		"msg":             "Account details fetched successfully",
 	})
 }
 

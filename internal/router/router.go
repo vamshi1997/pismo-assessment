@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/vamshi1997/pismo-assessment/internal/boot"
 
@@ -16,8 +17,11 @@ func InitiateRouter() {
 	InitAppRoutes(router)
 
 	serverAddr := fmt.Sprintf("%s:%v", cfg.AppConfig.Server.Host, cfg.AppConfig.Server.Port)
-	router.Run(serverAddr)
+	err := router.Run(serverAddr)
+	if err != nil {
+		log.Println("error while running the server:", err)
+		return
+	}
 
-	fmt.Printf("Server Started Successfully & listening to Port: %v", cfg.AppConfig.Server.Port)
-	router.Run(serverAddr) // Move this to the end since it's blocking
+	log.Printf("Server Started Successfully & listening to Port: %v", cfg.AppConfig.Server.Port)
 }

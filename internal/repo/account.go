@@ -1,9 +1,10 @@
 package repo
 
 import (
+	"log"
+
 	"github.com/vamshi1997/pismo-assessment/internal/boot"
 	"github.com/vamshi1997/pismo-assessment/internal/model"
-	"log"
 )
 
 func CreateAccount(account model.Account) (model.Account, error) {
