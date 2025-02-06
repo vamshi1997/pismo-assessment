@@ -53,17 +53,26 @@ This is a simple API server built with Go. It Contains three endpoints. It uses 
 6. Dockerfile contains set of commands for build image for the application and running them in docker
 7. run.sh file contains commands which are useful if just execute run.sh instead of running all required commands.
 
+## Prerequisites ##
 
+1. Docker
 
+## How to Run the Application in Docker ##
 
-## How to Run the Application ##
-
-1. Run below in terminal
+1. Run below commands in terminal
     ```bash run.sh``` or ```./run.sh```
 2. Incase of permission issue run below command first
     ```chmod +x run.sh```
 3. Once these are run successfully both database and application containers will be up and running. It may take some time to run them.
 4. We can then hit endpoints accordingly to test the application
+
+## How to Run the TestCases in Docker ##
+
+1. Run below commands in terminal
+    ```bash run-tests.sh``` or ```./run.sh```
+2. Incase of permission issue run below command first
+    ```chmod +x run-tests.sh```
+3. Need to wait until build is done and you can see files with test percentage and test cases passed or not.
 
 
 ## Endpoints for the Applicatoin ##

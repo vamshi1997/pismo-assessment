@@ -90,11 +90,13 @@ func (c *Controller) GetAccount(ctx *gin.Context) {
 		})
 		return
 	}
-	if accountInfo == nil || accountInfo.ID == 0 {
+
+	if &accountInfo == nil || accountInfo.ID == 0 {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"error_msg": "Account Details are empty",
 			"msg":       "Not able to fetch account details",
 		})
+		return // Add this return statement
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
@@ -161,6 +163,7 @@ func (c *Controller) CreateTransaction(ctx *gin.Context) {
 			"error_msg": "Account Details are empty",
 			"msg":       "Not able to create transaction",
 		})
+		return // Add this return statement
 	}
 
 	if transactionInfo, err = c.repo.CreateTransaction(transaction); err != nil {

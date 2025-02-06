@@ -1,0 +1,16 @@
+FROM golang:1.23
+
+WORKDIR /app
+
+# Copy go mod files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Run tests and generate coverage
+CMD go test -v -covermode=atomic -coverprofile=coverage.out ./... && \
+    go tool cover -func=coverage.out
