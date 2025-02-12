@@ -241,3 +241,16 @@ response:
 }
 ```
 
+New Features changes Screenshot
+
+<img width="1710" alt="Screenshot 2025-02-12 at 7 58 03 PM" src="https://github.com/user-attachments/assets/92fbb718-a93f-4e98-8364-75ad7de9e921" />
+
+
+
+
+
+
+
+
+
+
