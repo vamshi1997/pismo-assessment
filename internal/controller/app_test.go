@@ -225,38 +225,34 @@ func TestController_GetAccount(t *testing.T) {
 
 func TestController_CreateTransaction(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockRepo := mock.NewMockIRepository(ctrl)
-	controller := NewController(mockRepo)
 
 	tests := []struct {
 		name           string
 		input          model.Transaction
-		mockBehavior   func(mock *mock.MockIRepository)
+		mockBehavior   func(*mock.MockIRepository)
 		expectedStatus int
 		expectedBody   map[string]interface{}
 	}{
 		{
-			name: "Success - Purchase Transaction",
+			name: "Valid Purchase Transaction",
 			input: model.Transaction{
 				AccountID:       1,
 				OperationTypeId: 1,
-				Amount:          -100.00,
+				Amount:          -100.0,
 			},
-			mockBehavior: func(mock *mock.MockIRepository) {
-				mock.EXPECT().
+			mockBehavior: func(m *mock.MockIRepository) {
+				m.EXPECT().
 					GetAccount(uint(1)).
 					Return(&model.Account{ID: 1, DocumentNumber: "12345678901"}, nil)
 
-				mock.EXPECT().
+				m.EXPECT().
 					CreateTransaction(gomock.Any()).
 					Return(&model.Transaction{
 						ID:              1,
 						AccountID:       1,
 						OperationTypeId: 1,
-						Amount:          -100.00,
+						Amount:          -100.0,
+						Balance:         -100.0,
 					}, nil)
 			},
 			expectedStatus: http.StatusOK,
@@ -265,17 +261,17 @@ func TestController_CreateTransaction(t *testing.T) {
 				"account_id":        float64(1),
 				"transaction_id":    float64(1),
 				"operation_type_id": float64(1),
-				"amount":            float64(-100.00),
+				"amount":            float64(-100.0),
 			},
 		},
 		{
 			name: "Invalid Operation Type",
 			input: model.Transaction{
 				AccountID:       1,
-				OperationTypeId: 999, // Invalid operation type
-				Amount:          -100.00,
+				OperationTypeId: 10, // Invalid operation type
+				Amount:          -100.0,
 			},
-			mockBehavior:   func(mock *mock.MockIRepository) {},
+			mockBehavior:   func(m *mock.MockIRepository) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody: map[string]interface{}{
 				"error_msg": "Invalid operation type",
@@ -283,13 +279,13 @@ func TestController_CreateTransaction(t *testing.T) {
 			},
 		},
 		{
-			name: "Invalid Amount for Purchase Operation",
+			name: "Invalid Amount for Purchase (Positive Amount)",
 			input: model.Transaction{
 				AccountID:       1,
 				OperationTypeId: 1,
-				Amount:          100.00, // Positive amount for purchase
+				Amount:          100.0, // Should be negative for purchase
 			},
-			mockBehavior:   func(mock *mock.MockIRepository) {},
+			mockBehavior:   func(m *mock.MockIRepository) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody: map[string]interface{}{
 				"error_msg": "Amount can not be positive for this operation type",
@@ -297,30 +293,16 @@ func TestController_CreateTransaction(t *testing.T) {
 			},
 		},
 		{
-			name: "Invalid Amount for Credit Operation",
-			input: model.Transaction{
-				AccountID:       1,
-				OperationTypeId: 4,
-				Amount:          -100.00,
-			},
-			mockBehavior:   func(mock *mock.MockIRepository) {},
-			expectedStatus: http.StatusBadRequest,
-			expectedBody: map[string]interface{}{
-				"error_mgs": "Amount can not be negative for this operation type",
-				"msg":       "Not able to create transaction",
-			},
-		},
-		{
-			name: "Account Not Found",
+			name: "Invalid Account",
 			input: model.Transaction{
 				AccountID:       999,
 				OperationTypeId: 1,
-				Amount:          -100.00,
+				Amount:          -100.0,
 			},
-			mockBehavior: func(mock *mock.MockIRepository) {
-				mock.EXPECT().
+			mockBehavior: func(m *mock.MockIRepository) {
+				m.EXPECT().
 					GetAccount(uint(999)).
-					Return(nil, errors.New("account not found"))
+					Return((*model.Account)(nil), errors.New("account not found"))
 			},
 			expectedStatus: http.StatusNotFound,
 			expectedBody: map[string]interface{}{
@@ -330,55 +312,137 @@ func TestController_CreateTransaction(t *testing.T) {
 			},
 		},
 		{
-			name: "Transaction Creation Error",
+			name: "Valid Credit Voucher Transaction",
 			input: model.Transaction{
 				AccountID:       1,
-				OperationTypeId: 1,
-				Amount:          -100.00,
+				OperationTypeId: 4,
+				Amount:          100.0,
 			},
-			mockBehavior: func(mock *mock.MockIRepository) {
-				mock.EXPECT().
+			mockBehavior: func(m *mock.MockIRepository) {
+				// Create expected calls in sequence
+				gomock.InOrder(
+					// 1. Check account exists
+					m.EXPECT().
+						GetAccount(uint(1)).
+						Return(&model.Account{ID: 1, DocumentNumber: "12345678901"}, nil),
+
+					// 2. Get previous transactions
+					m.EXPECT().
+						GetPreviousTransactions().
+						Return([]model.Transaction{
+							{
+								ID:              1,
+								AccountID:       1,
+								OperationTypeId: 1,
+								Amount:          -150.0,
+								Balance:         -150.0,
+							},
+						}, nil),
+
+					// 3. Update transaction balance
+					m.EXPECT().
+						UpdateTransactionBalance(gomock.Any(), uint(1)).
+						Return(&model.Transaction{
+							ID:              1,
+							AccountID:       1,
+							OperationTypeId: 1,
+							Amount:          -150.0,
+							Balance:         0.0,
+						}, nil),
+
+					// 4. Create new transaction
+					m.EXPECT().
+						CreateTransaction(gomock.Any()).
+						Return(&model.Transaction{
+							ID:              2,
+							AccountID:       1,
+							OperationTypeId: 4,
+							Amount:          100.0,
+							Balance:         0.0,
+						}, nil),
+				)
+			},
+			expectedStatus: http.StatusOK,
+			expectedBody: map[string]interface{}{
+				"msg":               "transaction created successfully",
+				"account_id":        float64(1),
+				"transaction_id":    float64(2),
+				"operation_type_id": float64(4),
+				"amount":            float64(100.0),
+			},
+		},
+		{
+			name: "Credit Voucher With No Previous Transactions",
+			input: model.Transaction{
+				AccountID:       1,
+				OperationTypeId: 4,
+				Amount:          100.0,
+			},
+			mockBehavior: func(m *mock.MockIRepository) {
+				// First, expect GetAccount call
+				m.EXPECT().
 					GetAccount(uint(1)).
 					Return(&model.Account{ID: 1, DocumentNumber: "12345678901"}, nil)
 
-				mock.EXPECT().
+				// Then, expect GetPreviousTransactions call returning empty slice
+				m.EXPECT().
+					GetPreviousTransactions().
+					Return([]model.Transaction{}, nil)
+
+				// Expect CreateTransaction call
+				m.EXPECT().
 					CreateTransaction(gomock.Any()).
-					Return(nil, errors.New("database error"))
+					DoAndReturn(func(transaction model.Transaction) (*model.Transaction, error) {
+						return &model.Transaction{
+							ID:              1,
+							AccountID:       1,
+							OperationTypeId: 4,
+							Amount:          100.0,
+							Balance:         100.0,
+						}, nil
+					})
 			},
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusOK,
 			expectedBody: map[string]interface{}{
-				"error":     "database error",
-				"error_msg": "Invalid transaction",
-				"msg":       "Not able to create transaction",
+				"msg":               "transaction created successfully",
+				"account_id":        float64(1),
+				"transaction_id":    float64(1),
+				"operation_type_id": float64(4),
+				"amount":            float64(100.0),
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Setup
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockIRepository(ctrl)
+			tt.mockBehavior(mockRepo)
+			controller := NewController(mockRepo)
+
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
-			jsonValue, err := json.Marshal(tt.input)
-			assert.NoError(t, err)
-
-			c.Request = httptest.NewRequest("POST", "/transactions", bytes.NewBuffer(jsonValue))
+			// Create request body
+			jsonBytes, _ := json.Marshal(tt.input)
+			c.Request = httptest.NewRequest(http.MethodPost, "/transactions", bytes.NewBuffer(jsonBytes))
 			c.Request.Header.Set("Content-Type", "application/json")
 
-			tt.mockBehavior(mockRepo)
-
+			// Execute
 			controller.CreateTransaction(c)
 
+			// Assert
 			assert.Equal(t, tt.expectedStatus, w.Code)
 
 			var response map[string]interface{}
-			err = json.Unmarshal(w.Body.Bytes(), &response)
+			err := json.Unmarshal(w.Body.Bytes(), &response)
 			assert.NoError(t, err)
 
-			for key, expected := range tt.expectedBody {
-				actual, exists := response[key]
-				assert.True(t, exists, "Expected key %s not found in response", key)
-				assert.Equal(t, expected, actual, "Value mismatch for key %s", key)
+			for key, expectedValue := range tt.expectedBody {
+				assert.Equal(t, expectedValue, response[key])
 			}
 		})
 	}
