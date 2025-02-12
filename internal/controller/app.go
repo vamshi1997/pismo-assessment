@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vamshi1997/pismo-assessment/internal/model"
 	"github.com/vamshi1997/pismo-assessment/internal/repo"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -166,11 +167,84 @@ func (c *Controller) CreateTransaction(ctx *gin.Context) {
 		return // Add this return statement
 	}
 
-	if transactionInfo, err = c.repo.CreateTransaction(transaction); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":     err.Error(),
-			"error_msg": "Invalid transaction",
-			"msg":       "Not able to create transaction"})
+	// case 1: in case copy balance
+	if transaction.OperationTypeId == 1 || transaction.OperationTypeId == 2 || transaction.OperationTypeId == 3 {
+		transaction.Balance = transaction.Amount
+
+		if transactionInfo, err = c.repo.CreateTransaction(transaction); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error":     err.Error(),
+				"error_msg": "Invalid transaction",
+				"msg":       "Not able to create transaction"})
+			return
+		}
+	}
+
+	// case 2: read previous transaction and update it
+	if transaction.OperationTypeId == 4 {
+		previousTransactions, err := c.repo.GetPreviousTransactions()
+
+		log.Println("previous transactions len: ", len(previousTransactions))
+		log.Println("previous transactions: ", previousTransactions)
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{})
+			return
+		}
+
+		if len(previousTransactions) <= 0 {
+
+			transaction.Balance = transaction.Amount
+
+			if transactionInfo, err = c.repo.CreateTransaction(transaction); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{
+					"error":     err.Error(),
+					"error_msg": "Invalid transaction",
+					"msg":       "Not able to create transaction"})
+			}
+
+			ctx.JSON(http.StatusOK, map[string]interface{}{
+				"msg":               "transaction created successfully",
+				"account_id":        transaction.AccountID,
+				"transaction_id":    transactionInfo.ID,
+				"operation_type_id": transaction.OperationTypeId,
+				"amount":            transaction.Amount})
+
+			return
+		} else {
+			remainingBalance := transaction.Amount
+			log.Println("initial remaining balance: ", remainingBalance)
+
+			for _, previousTransaction := range previousTransactions {
+				if previousTransaction.Balance < 0 {
+					remainingBalance = remainingBalance + previousTransaction.Balance
+					log.Println("leftover remaining balance: ", remainingBalance)
+
+					if remainingBalance >= 0 {
+						c.repo.UpdateTransactionBalance(0, previousTransaction.ID)
+					} else {
+						c.repo.UpdateTransactionBalance(remainingBalance, previousTransaction.ID)
+						break
+					}
+				}
+			}
+
+			if remainingBalance > 0 {
+				transaction.Balance = remainingBalance
+				transactionInfo, _ = c.repo.CreateTransaction(transaction)
+			} else {
+				transaction.Balance = 0
+				transactionInfo, _ = c.repo.CreateTransaction(transaction)
+			}
+		}
+
+		ctx.JSON(http.StatusOK, map[string]interface{}{
+			"msg":               "transaction created successfully",
+			"account_id":        transaction.AccountID,
+			"transaction_id":    transactionInfo.ID,
+			"operation_type_id": transaction.OperationTypeId,
+			"amount":            transaction.Amount})
+
 		return
 	}
 
