@@ -78,3 +78,33 @@ func (mr *MockIRepositoryMockRecorder) GetAccount(accountId interface{}) *gomock
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockIRepository)(nil).GetAccount), accountId)
 }
+
+// GetPreviousTransactions mocks base method.
+func (m *MockIRepository) GetPreviousTransactions() ([]model.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPreviousTransactions")
+	ret0, _ := ret[0].([]model.Transaction)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPreviousTransactions indicates an expected call of GetPreviousTransactions.
+func (mr *MockIRepositoryMockRecorder) GetPreviousTransactions() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPreviousTransactions", reflect.TypeOf((*MockIRepository)(nil).GetPreviousTransactions))
+}
+
+// UpdateTransactionBalance mocks base method.
+func (m *MockIRepository) UpdateTransactionBalance(balance float64, transactionId uint) (*model.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTransactionBalance", balance, transactionId)
+	ret0, _ := ret[0].(*model.Transaction)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateTransactionBalance indicates an expected call of UpdateTransactionBalance.
+func (mr *MockIRepositoryMockRecorder) UpdateTransactionBalance(balance, transactionId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTransactionBalance", reflect.TypeOf((*MockIRepository)(nil).UpdateTransactionBalance), balance, transactionId)
+}
